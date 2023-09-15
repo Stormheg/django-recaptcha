@@ -1,10 +1,11 @@
 Authors
 =======
 
-Current Maintainer
+Current Maintainers
 ------------------
 
 * `Andrew Chen Wang <https://github.com/Andrew-Chen-Wang>`_
+* `Storm Heg <https://github.com/Stormheg>`_
 
 Praekelt Consulting
 -------------------
