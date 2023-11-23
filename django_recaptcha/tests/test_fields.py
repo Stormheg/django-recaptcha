@@ -1,3 +1,4 @@
+import warnings
 from unittest.mock import MagicMock, PropertyMock, patch
 from urllib.error import HTTPError
 
@@ -326,11 +327,34 @@ class TestWidgets(TestCase):
             html,
         )
 
+    def test_field_required_score_attribute_html(self):
+        # TODO: remove this warning context manager check when required_score is removed
+        # and only data-required-score is used
+        with self.assertWarnsMessage(DeprecationWarning, "required_score"):
+
+            class VThreeDomainForm(forms.Form):
+                captcha = fields.ReCaptchaField(
+                    # required_score is deprecated
+                    widget=widgets.ReCaptchaV3(attrs={"required_score": 0.8})
+                )
+
+        form = VThreeDomainForm()
+
+        html = form.as_p()
+        self.assertNotIn(
+            'required_score="0.8"',
+            html,
+        )
+        self.assertIn(
+            'data-required-score="0.8"',
+            html,
+        )
+
     @patch("django_recaptcha.fields.client.submit")
     def test_client_success_response_v3(self, mocked_submit):
         class VThreeDomainForm(forms.Form):
             captcha = fields.ReCaptchaField(
-                widget=widgets.ReCaptchaV3(attrs={"required_score": 0.8})
+                widget=widgets.ReCaptchaV3(attrs={"data-required-score": 0.8})
             )
 
         mocked_submit.return_value = RecaptchaResponse(
@@ -344,7 +368,7 @@ class TestWidgets(TestCase):
     def test_client_failure_response_v3(self, mocked_submit):
         class VThreeDomainForm(forms.Form):
             captcha = fields.ReCaptchaField(
-                widget=widgets.ReCaptchaV3(attrs={"required_score": 0.8})
+                widget=widgets.ReCaptchaV3(attrs={"data-required-score": 0.8})
             )
 
         mocked_submit.return_value = RecaptchaResponse(

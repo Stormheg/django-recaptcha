@@ -1,4 +1,5 @@
 import uuid
+import warnings
 from urllib.parse import urlencode
 
 from django.conf import settings
@@ -76,10 +77,21 @@ class ReCaptchaV3(ReCaptchaBase):
 
     def __init__(self, api_params=None, action=None, *args, **kwargs):
         super().__init__(api_params=api_params, *args, **kwargs)
-        if not self.attrs.get("required_score", None):
-            self.attrs["required_score"] = getattr(
+        if not self.attrs.get("data-required-score", None):
+            self.attrs["data-required-score"] = getattr(
                 settings, "RECAPTCHA_REQUIRED_SCORE", None
             )
+
+        # TODO: remove in next major release
+        # Support deprecated required_score attribute for backwards compatibility.
+        if self.attrs.get("required_score", None):
+            warnings.warn(
+                "The required_score attribute is deprecated. Use data-required-score instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            self.attrs["data-required-score"] = self.attrs["required_score"]
+            del self.attrs["required_score"]
         self.action = action
 
     def build_attrs(self, base_attrs, extra_attrs=None):
